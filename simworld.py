@@ -102,7 +102,7 @@ class SimWorld:
             flag.set_color(.8, .8, 0)
             self.viewer.add_geom(flag)
 
-        pos = self.state[0]
+        pos = self.position
         self.cartrans.set_translation(
             (pos - self.min_position) * scale, self._height(pos) * scale
         )
