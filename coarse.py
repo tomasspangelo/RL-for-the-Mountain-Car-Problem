@@ -86,7 +86,7 @@ class Tiling:
 
         y_low = self.y_range[0] - self.offset_y
         for i in range(self.partitions - 1, -1, -1):
-            x_low =  self.x_range[0] - self.offset_x
+            x_low = self.x_range[0] - self.offset_x
             for j in range(self.partitions):
                 x_range = (x_low, x_low + self.width)
                 y_range = (y_low, y_low + self.height)
@@ -107,5 +107,5 @@ class Tiling:
 if __name__ == "__main__":
     tc = TileCoding(4, 4, (-1.2, 0.6), (-0.7, 0.7), (0.5, 0.5), 1)
     tc.visualize()
-    print(tc.get_encoding(0.5, 0.5))
+    print(tc.get_encoding(-1.2, -0.7))
     pass
