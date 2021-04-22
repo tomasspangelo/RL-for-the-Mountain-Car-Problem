@@ -1,13 +1,61 @@
+import numpy as np
+from simworld import SimWorld
+
 class ReinforcementLearningSystem:
     """
     Class for the reinforcement learning system.
     """
 
-    def __init__(self, actor):
+    def __init__(self, actor, gamma, alpha):
         self.actor = actor
+        self.max_actions = 1000
+        self.gamma = gamma                      # discount factor
+        self.alpha = alpha                      # learning rate
 
-    def learn(self):
+    def learn(self, episodes, tc):
         """
         This method will be the main SARSA learning algorithm.
+        Let S be a vector, A is -1, 1 og 0.
         """
-        pass
+        x = None
+        velocity = None
+
+        # FOR EACH EPISODE
+        for episode in range(episodes):
+            # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
+            x = np.random.uniform(-0.6,-0.4,1)[0]
+            velocity = 0
+            env = SimWorld(x,velocity)
+
+            # CHOOSE ACTION A FROM S USING Q
+            state_vector = tc.get_encoding(x, velocity)
+            action = self.actor.get_action(state_vector)
+
+            num_actions = 1
+            finished = False
+
+            # FOR EACH STEP IN EPISODE
+            while num_actions < self.max_actions or finished:
+
+                # TAKE ACTION A OBSERVE R, S'
+                x, velocity, reward, finished = env.perform_action(action)
+
+                # CHOOSE ACTION A' FROM S' USING Q
+                next_state_vector = tc.get_encoding(x, velocity)
+                next_action = self.actor.get_action(next_state_vector)
+
+                # UPDATE Q
+                q = self.actor.get_q(state_vector, action)
+                next_q = self.actor.get_q(next_state_vector, next_action)
+                target = q + self.alpha*(reward + self.gamma*next_q - q)
+                self.actor.update_policy(state_vector, action, target)
+
+                # READY FOR NEXT STEP: S = S', A = A'
+                state_vector = next_state_vector
+                action = next_action
+                num_actions += 1
+
+
+if __name__ == "__main__":
+    rl = ReinforcementLearningSystem()
+    rl.learn(1)
