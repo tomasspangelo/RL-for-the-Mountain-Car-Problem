@@ -1,5 +1,7 @@
 import numpy as np
 from simworld import SimWorld
+from tqdm import tqdm
+
 
 class ReinforcementLearningSystem:
     """
@@ -23,11 +25,11 @@ class ReinforcementLearningSystem:
         velocity = None
 
         # FOR EACH EPISODE
-        for episode in range(self.episodes):
+        for episode in tqdm(range(self.episodes)):
             # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
-            x = np.random.uniform(-0.6,-0.4,1)[0]
+            x = np.random.uniform(-0.6, -0.4, 1)[0]
             velocity = 0
-            env = SimWorld(x,velocity)
+            env = SimWorld(x, velocity)
 
             # CHOOSE ACTION A FROM S USING Q
             state_vector = self.tc.get_encoding(x, velocity)
@@ -38,7 +40,8 @@ class ReinforcementLearningSystem:
 
             # FOR EACH STEP IN EPISODE
             while num_actions < self.max_actions or finished:
-
+                if episode == self.episodes-1:
+                    env.render()
                 # TAKE ACTION A OBSERVE R, S'
                 x, velocity, reward, finished = env.perform_action(action)
 
@@ -56,8 +59,3 @@ class ReinforcementLearningSystem:
                 state_vector = next_state_vector
                 action = next_action
                 num_actions += 1
-
-
-if __name__ == "__main__":
-    rl = ReinforcementLearningSystem()
-    rl.learn(1)
