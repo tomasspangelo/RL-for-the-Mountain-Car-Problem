@@ -4,6 +4,7 @@ from tqdm import tqdm
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 
 class ReinforcementLearningSystem:
@@ -73,5 +74,7 @@ class ReinforcementLearningSystem:
 
         data = pd.DataFrame({"Steps": progress})
         data["Episodes"] = [i for i in range(self.episodes)]
+        file = open("./data/data.pickle", "wb")
+        pickle.dump(data, file)
         data.plot.scatter(x="Episodes", y="Steps")
         plt.show()
