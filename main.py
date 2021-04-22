@@ -6,6 +6,9 @@ from rls import ReinforcementLearningSystem
 from actor import Actor
 import json
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 def init_actor(actor_config, input_shape):
     epsilon = float(actor_config['epsilon'])
