@@ -1,4 +1,6 @@
 import random
+import tensorflow as tf
+import numpy as np
 
 
 class Actor:
@@ -12,9 +14,8 @@ class Actor:
         self.epsilon_decay = epsilon_decay
 
     def get_q(self, tiled_state, action):
-        state_action_pair = tiled_state.copy().append(action)
-        state_action_pair.append(action)
-        return self.policy(state_action_pair)
+        sa = np.concatenate((tiled_state, [action]), axis=None)
+        return self.policy(sa.reshape((1,)+sa.shape)).numpy()[0, 0]
 
     def get_action(self, tiled_state):
         legal_actions = [-1, 0, 1]
@@ -30,9 +31,28 @@ class Actor:
         return best_action
 
     def update_policy(self, tiled_state, action, target):
-        state_action_pair = tiled_state.copy()
-        state_action_pair.append(action)
-        self.policy.fit(state_action_pair, target, epochs=1, verbosity=0)
+        sa = np.concatenate((tiled_state, [action]), axis=None)
+        sa = sa.reshape((1,) + sa.shape)
+        target = np.array([target])
+        target = target.reshape((1,) + target.shape)
+        self.policy.fit(sa, target, epochs=1)
 
     def update_epsilon(self):
         self.epsilon *= self.epsilon_decay
+
+
+if __name__ == "__main__":
+    keras_model = tf.keras.models.Sequential()
+    keras_model.add(tf.keras.Input(shape=(5,)))
+    keras_model.add(tf.keras.layers.Dense(units=1, activation='linear'))
+
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+
+    keras_model.compile(optimizer=optimizer,
+                        loss=tf.keras.losses.MeanSquaredError(),
+                        metrics=[
+                            tf.keras.metrics.MeanSquaredError()
+                        ])
+    actor = Actor(keras_model, 0.1, 1)
+    print(actor.get_q(np.array([1, 1, 1, 1]), 1))
+    actor.update_policy(np.array([1, 1, 1, 1]), 1, 2.2)
