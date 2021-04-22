@@ -24,8 +24,9 @@ class TileCoding:
         for i in range(self.num_tilings):
             offset_x = np.random.uniform(0, max_offset_x)
             offset_y = np.random.uniform(0, max_offset_y)
-
-            tiling = Tiling(self.partitions, self.x_range, self.y_range, offset_x, offset_y)
+            x_range = (self.x_range[0], self.x_range[1]+self.extra_lengths[0])
+            y_range = (self.y_range[0], self.y_range[1]+self.extra_lengths[1])
+            tiling = Tiling(self.partitions, x_range, y_range, offset_x, offset_y)
             self.tilings.append(tiling)
 
     def get_encoding(self, x, y):
@@ -38,19 +39,28 @@ class TileCoding:
 
     def visualize(self):
         fig, ax = plt.subplots()
-        ax.plot([self.x_range[0], self.x_range[1]],
-                [self.y_range[0], self.y_range[1]],
+        ax.plot([self.x_range[0]-self.extra_lengths[0], self.x_range[1]+self.extra_lengths[0]],
+                [self.y_range[0]-self.extra_lengths[1], self.y_range[1]+self.extra_lengths[0]],
                 alpha=0)
         for tile in self.tilings:
-            x = tile.x_range[0] + tile.offset_x
-            y = tile.y_range[0] + tile.offset_y
+            x = tile.x_range[0] - tile.offset_x
+            y = tile.y_range[0] - tile.offset_y
             width = tile.width * self.partitions
             height = tile.height * self.partitions
             ax.add_patch(Rectangle((x, y), width, height,
                                    edgecolor='pink',
                                    facecolor='blue',
                                    fill=True,
-                                   lw=5))
+                                   lw=5,
+                                   alpha=0.3))
+        width = self.x_range[1] - self.x_range[0]
+        height = self.y_range[1] - self.y_range[0]
+        ax.add_patch(Rectangle((self.x_range[0], self.y_range[0]), width, height,
+                               edgecolor='pink',
+                               facecolor='grey',
+                               fill=True,
+                               lw=5,
+                               alpha=0.5))
 
         plt.show()
 
@@ -71,8 +81,8 @@ class Tiling:
         self.height = (y_range[1] - y_range[0]) / partitions
 
     def get_encoding(self, x, y):
-        x_low = self.x_range[0] + self.offset_x
-        y_low = self.y_range[0] + self.offset_y
+        x_low = self.x_range[0] - self.offset_x
+        y_low = self.y_range[0] - self.offset_y
 
         encoding = np.zeros((self.partitions, self.partitions))
 
@@ -95,5 +105,6 @@ class Tiling:
 
 
 if __name__ == "__main__":
-    tc = TileCoding(4, 4, (-1.2, 0.6), (-0.7, 0.7), (0.5, 0.5), 0.5)
+    tc = TileCoding(4, 4, (-1.2, 0.6), (-0.7, 0.7), (0.5, 0.5), 1)
     tc.visualize()
+    pass
