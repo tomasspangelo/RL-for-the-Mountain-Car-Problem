@@ -4,6 +4,7 @@ import tensorflow as tf
 from coarse import TileCoding
 from rls import ReinforcementLearningSystem
 from actor import Actor
+import json
 
 
 def init_actor(actor_config, input_shape):
@@ -39,10 +40,10 @@ def init_rls(actor, tc, rls_config):
 def init_tc(tc_config):
     num_tilings = int(tc_config["num_tilings"])
     partitions = int(tc_config["partitions"])
-    x_range = int(tc_config["x_range"])
-    y_range = int(tc_config["y_range"])
-    extra_lengths = int(tc_config["extra_lengths"])
-    offset_percent = int(tc_config["offset_percent"])
+    x_range = json.loads(tc_config["x_range"])
+    y_range = json.loads(tc_config["y_range"])
+    extra_lengths = json.loads(tc_config["extra_lengths"])
+    offset_percent = float(tc_config["offset_percent"])
     tc = TileCoding(num_tilings, partitions, x_range, y_range, extra_lengths, offset_percent)
     return tc
 
