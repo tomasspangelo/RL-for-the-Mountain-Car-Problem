@@ -66,8 +66,13 @@ class ReinforcementLearningSystem:
                 state_vector = next_state_vector
                 action = next_action
                 num_actions += 1
+
+                if finished:
+                    print("MADE IT!")
+                elif num_actions >= self.max_actions:
+                    print("Timeout :(")
             progress.append(num_actions)
-            if (episode + 1) % save_interval:
+            if (episode + 1) % save_interval == 0:
                 self.actor.save_policy(episode+1)
 
         self.actor.save_policy(self.episodes)
