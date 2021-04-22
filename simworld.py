@@ -16,12 +16,7 @@ class SimWorld:
         self.velocity = velocity
         self.goal_position = 0.6
 
-        self.action_count = 0
-
     def is_finished(self, position, velocity):
-        return self.has_won(position, velocity) or self.action_count >= 1000
-
-    def has_won(self, position, velocity):
         return position >= self.goal_position and velocity >= 0
 
     def perform_action(self, action):
