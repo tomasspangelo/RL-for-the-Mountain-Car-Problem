@@ -2,6 +2,7 @@ import numpy as np
 import math
 
 
+
 class SimWorld:
     """
     SimWorld class for the mountain car problem.
@@ -34,7 +35,12 @@ class SimWorld:
             velocity = 0
 
         finished = self.is_finished(position, velocity)
-        reward = 0 if self.is_finished(position, velocity) else -1
+        # Remove all but line 43(last reward define) to get back to normal rewards
+        dif = 0.5*(velocity-self.velocity)**2 + 9.81*(math.cos(3*((position-self.position)+math.pi/2)))
+        if dif > 0:
+            reward = 1 if self.is_finished(position, velocity) else 0
+        else:
+            reward = 1 if self.is_finished(position, velocity) else -1
 
         self.velocity = velocity
         self.position = position
