@@ -6,13 +6,15 @@ class ReinforcementLearningSystem:
     Class for the reinforcement learning system.
     """
 
-    def __init__(self, actor, gamma, alpha):
+    def __init__(self, actor, tc, gamma, alpha, episodes):
         self.actor = actor
+        self.tc = tc
         self.max_actions = 1000
         self.gamma = gamma                      # discount factor
         self.alpha = alpha                      # learning rate
+        self.episodes = episodes
 
-    def learn(self, episodes, tc):
+    def learn(self):
         """
         This method will be the main SARSA learning algorithm.
         Let S be a vector, A is -1, 1 og 0.
@@ -21,14 +23,14 @@ class ReinforcementLearningSystem:
         velocity = None
 
         # FOR EACH EPISODE
-        for episode in range(episodes):
+        for episode in range(self.episodes):
             # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
             x = np.random.uniform(-0.6,-0.4,1)[0]
             velocity = 0
             env = SimWorld(x,velocity)
 
             # CHOOSE ACTION A FROM S USING Q
-            state_vector = tc.get_encoding(x, velocity)
+            state_vector = self.tc.get_encoding(x, velocity)
             action = self.actor.get_action(state_vector)
 
             num_actions = 1
@@ -41,7 +43,7 @@ class ReinforcementLearningSystem:
                 x, velocity, reward, finished = env.perform_action(action)
 
                 # CHOOSE ACTION A' FROM S' USING Q
-                next_state_vector = tc.get_encoding(x, velocity)
+                next_state_vector = self.tc.get_encoding(x, velocity)
                 next_action = self.actor.get_action(next_state_vector)
 
                 # UPDATE Q

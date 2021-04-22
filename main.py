@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import tensorflow as tf
+from rls import ReinforcementLearningSystem
 
 from actor import Actor
 
@@ -24,23 +25,28 @@ def init_actor(actor_config, input_shape):
 
     return actor
 
+def init_rls(actor, coarse,rls_config):
+    gamma = float(rls_config["gamma"])
+    alpha = float(rls_config["alpha"])
+    episodes = int(rls_config["episodes"])
+    rls = ReinforcementLearningSystem(actor, coarse,gamma, alpha, episodes)
+
+    return rls
+
 
 def main():
     config = ConfigParser()
 
     config.read("./config.ini")
 
-    # Must set up
-    simworld = init_simworld(config['simworld'])
-
     #Must set up
     coarse = init_coarse(config['coarse'])
 
     input_shape = coarse.partitions**2 * coarse.tilings + 1
-    actor = init_actor(config['actor'], simworld, input_shape)
+    actor = init_actor(config['actor'], input_shape)
 
     # Must set up
-    learner = init_learner(actor, simworld, config["learner"])
+    learner = init_rls(actor, coarse, config["rls"])
 
     learner.learn()
 
