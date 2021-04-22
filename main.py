@@ -30,9 +30,8 @@ def init_actor(actor_config, input_shape):
 
 def init_rls(actor, tc, rls_config):
     gamma = float(rls_config["gamma"])
-    alpha = float(rls_config["alpha"])
     episodes = int(rls_config["episodes"])
-    rls = ReinforcementLearningSystem(actor, tc, gamma, alpha, episodes)
+    rls = ReinforcementLearningSystem(actor, tc, gamma, episodes)
 
     return rls
 

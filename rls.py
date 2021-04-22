@@ -11,12 +11,11 @@ class ReinforcementLearningSystem:
     Class for the reinforcement learning system.
     """
 
-    def __init__(self, actor, tc, gamma, alpha, episodes):
+    def __init__(self, actor, tc, gamma, episodes):
         self.actor = actor
         self.tc = tc
         self.max_actions = 1000
         self.gamma = gamma                      # discount factor
-        self.alpha = alpha                      # learning rate
         self.episodes = episodes
 
     def learn(self):
@@ -57,9 +56,8 @@ class ReinforcementLearningSystem:
                 next_action = self.actor.get_action(next_state_vector)
 
                 # UPDATE Q
-                q = self.actor.get_q(state_vector, action)
                 next_q = self.actor.get_q(next_state_vector, next_action)
-                target = q + self.alpha*(reward + self.gamma*next_q - q)
+                target = reward + self.gamma*next_q
                 self.actor.update_policy(state_vector, action, target)
 
                 # READY FOR NEXT STEP: S = S', A = A'
