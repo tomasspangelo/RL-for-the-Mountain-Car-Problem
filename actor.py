@@ -43,6 +43,9 @@ class Actor:
     def update_epsilon(self):
         self.epsilon *= self.epsilon_decay
 
+    def save_policy(self, episode):
+        self.policy.save("./anets/{episode}".format(episode=episode))
+
 
 if __name__ == "__main__":
     keras_model = tf.keras.models.Sequential()

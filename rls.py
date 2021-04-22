@@ -18,7 +18,7 @@ class ReinforcementLearningSystem:
         self.gamma = gamma                      # discount factor
         self.episodes = episodes
 
-    def learn(self):
+    def learn(self, save_interval):
         """
         This method will be the main SARSA learning algorithm.
         Let S be a vector, A is -1, 1 og 0.
@@ -27,6 +27,7 @@ class ReinforcementLearningSystem:
         velocity = None
         progress = []
 
+        self.actor.save_policy(0)
         # FOR EACH EPISODE
         for episode in tqdm(range(self.episodes)):
             # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
@@ -65,6 +66,11 @@ class ReinforcementLearningSystem:
                 action = next_action
                 num_actions += 1
             progress.append(num_actions)
+            if (episode + 1) % save_interval:
+                self.actor.save_policy(episode+1)
+
+        self.actor.save_policy(self.episodes)
+
         data = pd.DataFrame({"Steps": progress})
         data["Episodes"] = [i for i in range(self.episodes)]
         data.plot.scatter(x="Episodes", y="Steps")

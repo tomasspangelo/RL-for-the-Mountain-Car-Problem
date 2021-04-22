@@ -60,7 +60,8 @@ def main():
 
     learner = init_rls(actor, tc, config["rls"])
 
-    learner.learn()
+    save_interval = int(config.get("rls", "save_interval"))
+    learner.learn(save_interval)
 
 
 if __name__ == "__main__":
