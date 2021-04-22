@@ -1,7 +1,8 @@
 from configparser import ConfigParser
 import tensorflow as tf
-from rls import ReinforcementLearningSystem
 
+from coarse import TileCoding
+from rls import ReinforcementLearningSystem
 from actor import Actor
 
 
@@ -25,13 +26,25 @@ def init_actor(actor_config, input_shape):
 
     return actor
 
-def init_rls(actor, coarse,rls_config):
+
+def init_rls(actor, tc, rls_config):
     gamma = float(rls_config["gamma"])
     alpha = float(rls_config["alpha"])
     episodes = int(rls_config["episodes"])
-    rls = ReinforcementLearningSystem(actor, coarse,gamma, alpha, episodes)
+    rls = ReinforcementLearningSystem(actor, tc, gamma, alpha, episodes)
 
     return rls
+
+
+def init_tc(tc_config):
+    num_tilings = int(tc_config["num_tilings"])
+    partitions = int(tc_config["partitions"])
+    x_range = int(tc_config["x_range"])
+    y_range = int(tc_config["y_range"])
+    extra_lengths = int(tc_config["extra_lengths"])
+    offset_percent = int(tc_config["offset_percent"])
+    tc = TileCoding(num_tilings, partitions, x_range, y_range, extra_lengths, offset_percent)
+    return tc
 
 
 def main():
@@ -39,14 +52,12 @@ def main():
 
     config.read("./config.ini")
 
-    #Must set up
-    coarse = init_coarse(config['coarse'])
+    tc = init_tc(config['tile_coding'])
 
-    input_shape = coarse.partitions**2 * coarse.tilings + 1
+    input_shape = tc.partitions ** 2 * tc.num_tilings + 1
     actor = init_actor(config['actor'], input_shape)
 
-    # Must set up
-    learner = init_rls(actor, coarse, config["rls"])
+    learner = init_rls(actor, tc, config["rls"])
 
     learner.learn()
 
