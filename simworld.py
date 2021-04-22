@@ -34,7 +34,7 @@ class SimWorld:
             velocity = 0
 
         finished = self.is_finished(position, velocity)
-        reward = 1 if self.has_won(position, velocity) else -1
+        reward = 1 if self.is_finished(position, velocity) else -1
 
         self.velocity = velocity
         self.position = position
