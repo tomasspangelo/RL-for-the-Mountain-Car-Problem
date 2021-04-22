@@ -1,6 +1,7 @@
 import numpy as np
 from simworld import SimWorld
 from tqdm import tqdm
+import time
 
 
 class ReinforcementLearningSystem:
@@ -33,6 +34,7 @@ class ReinforcementLearningSystem:
 
             # CHOOSE ACTION A FROM S USING Q
             state_vector = self.tc.get_encoding(x, velocity)
+
             action = self.actor.get_action(state_vector)
 
             num_actions = 1
@@ -42,6 +44,8 @@ class ReinforcementLearningSystem:
             while num_actions < self.max_actions or finished:
                 if episode == self.episodes-1:
                     env.render()
+                    time.sleep(0.05)
+
                 # TAKE ACTION A OBSERVE R, S'
                 x, velocity, reward, finished = env.perform_action(action)
 
