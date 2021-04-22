@@ -16,16 +16,13 @@ def init_actor(actor_config, input_shape):
     learning_rate = float(actor_config['learning_rate'])
 
     keras_model = tf.keras.models.Sequential()
-    keras_model.add(tf.keras.Input(shape=(input_shape, )))
-    keras_model.add(tf.keras.layers.Dense(units=1, activation='linear'))
+    keras_model.add(tf.keras.Input(shape=input_shape))
+    keras_model.add(tf.keras.layers.Dense(units=1, activation='tanh'))
 
     optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
 
     keras_model.compile(optimizer=optimizer,
-                        loss=tf.keras.losses.MeanSquaredError(),
-                        metrics=[
-                            tf.keras.metrics.MeanSquaredError()
-                        ])
+                        loss=tf.keras.losses.MeanSquaredError())
     actor = Actor(keras_model, epsilon, epsilon_decay_factor)
 
     return actor
@@ -47,7 +44,8 @@ def init_tc(tc_config):
     y_range = json.loads(tc_config["y_range"])
     extra_lengths = json.loads(tc_config["extra_lengths"])
     offset_percent = float(tc_config["offset_percent"])
-    tc = TileCoding(num_tilings, partitions, x_range, y_range, extra_lengths, offset_percent)
+    tc = TileCoding(num_tilings, partitions, x_range,
+                    y_range, extra_lengths, offset_percent)
     return tc
 
 
