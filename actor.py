@@ -35,7 +35,10 @@ class Actor:
         sa = sa.reshape((1,) + sa.shape)
         target = np.array([target])
         target = target.reshape((1,) + target.shape)
-        self.policy.fit(sa, target, epochs=1)
+        # print("Feature:",sa)
+        # print("Target:",target)
+        self.policy.fit(sa, target, epochs=1, verbose=0)
+        #print("Output", self.policy(sa).numpy())
 
     def update_epsilon(self):
         self.epsilon *= self.epsilon_decay
@@ -44,7 +47,7 @@ class Actor:
 if __name__ == "__main__":
     keras_model = tf.keras.models.Sequential()
     keras_model.add(tf.keras.Input(shape=(5,)))
-    keras_model.add(tf.keras.layers.Dense(units=1, activation='linear'))
+    keras_model.add(tf.keras.layers.Dense(units=1, activation='tanh'))
 
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
 

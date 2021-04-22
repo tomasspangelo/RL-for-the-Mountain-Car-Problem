@@ -2,6 +2,8 @@ import numpy as np
 from simworld import SimWorld
 from tqdm import tqdm
 import time
+import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class ReinforcementLearningSystem:
@@ -24,6 +26,7 @@ class ReinforcementLearningSystem:
         """
         x = None
         velocity = None
+        progress = []
 
         # FOR EACH EPISODE
         for episode in tqdm(range(self.episodes)):
@@ -44,7 +47,7 @@ class ReinforcementLearningSystem:
             while num_actions < self.max_actions and not finished:
                 if episode == self.episodes-1:
                     env.render()
-                    time.sleep(0.05)
+                    time.sleep(0)
 
                 # TAKE ACTION A OBSERVE R, S'
                 x, velocity, reward, finished = env.perform_action(action)
@@ -63,3 +66,8 @@ class ReinforcementLearningSystem:
                 state_vector = next_state_vector
                 action = next_action
                 num_actions += 1
+            progress.append(num_actions)
+        data = pd.DataFrame({"Steps": progress})
+        data["Episodes"] = [i for i in range(self.episodes)]
+        data.plot.scatter(x="Episodes", y="Steps")
+        plt.show()
