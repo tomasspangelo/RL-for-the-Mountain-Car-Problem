@@ -37,7 +37,7 @@ class Actor:
         target = target.reshape((1,) + target.shape)
         # print("Feature:",sa)
         # print("Target:",target)
-        self.policy.fit(sa, target, epochs=1, verbose=0)
+        self.policy.fit(sa, target, epochs=3, verbose=1)
         #print("Output", self.policy(sa).numpy())
 
     def update_epsilon(self):
