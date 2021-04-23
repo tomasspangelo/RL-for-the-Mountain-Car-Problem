@@ -6,18 +6,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
 
-
+from datetime import datetime
 class ReinforcementLearningSystem:
     """
     Class for the reinforcement learning system.
     """
 
     def __init__(self, actor, tc, gamma, episodes):
+        timestamp = datetime.now().strftime("%d_%H:%M:%S")
         self.actor = actor
         self.tc = tc
         self.max_actions = 1000
         self.gamma = gamma                      # discount factor
         self.episodes = episodes
+        self.filename = timestamp
 
     def learn(self, save_interval):
         """
@@ -28,7 +30,7 @@ class ReinforcementLearningSystem:
         velocity = None
         progress = []
 
-        self.actor.save_policy(0)
+        self.actor.save_policy(0, self.filename)
         # FOR EACH EPISODE
         for episode in tqdm(range(self.episodes)):
             # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
@@ -67,19 +69,23 @@ class ReinforcementLearningSystem:
                 action = next_action
                 num_actions += 1
 
+
                 if finished:
                     print("MADE IT!")
                 elif num_actions >= self.max_actions:
                     print("Timeout :(")
+
             progress.append(num_actions)
             if (episode + 1) % save_interval == 0:
-                self.actor.save_policy(episode+1)
+                self.actor.save_policy(episode+1, self.filename)
 
-        self.actor.save_policy(self.episodes)
+            self.actor.update_epsilon()
+
+        self.actor.save_policy(self.episodes, self.filename)
 
         data = pd.DataFrame({"Steps": progress})
         data["Episodes"] = [i for i in range(self.episodes)]
-        file = open("./data/data.pickle", "wb")
+        file = open(f"./data/{self.filename}_data.pickle", "wb")
         pickle.dump(data, file)
         data.plot.scatter(x="Episodes", y="Steps")
         plt.show()
