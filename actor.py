@@ -43,8 +43,8 @@ class Actor:
     def update_epsilon(self):
         self.epsilon *= self.epsilon_decay
 
-    def save_policy(self, episode):
-        self.policy.save("./anets/{episode}".format(episode=episode))
+    def save_policy(self, episode, filename):
+        self.policy.save("./anets/{filename}/{episode}".format(episode=episode, filename=filename))
 
 
 if __name__ == "__main__":
