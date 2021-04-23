@@ -17,7 +17,7 @@ def init_actor(actor_config, input_shape):
 
     keras_model = tf.keras.models.Sequential()
     keras_model.add(tf.keras.Input(shape=input_shape))
-    keras_model.add(tf.keras.layers.Dense(units=1, activation='tanh'))
+    keras_model.add(tf.keras.layers.Dense(units=1, activation='linear'))
 
     optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
 
