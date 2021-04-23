@@ -5,6 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
+from datetime import datetime
 
 
 class ReinforcementLearningSystem:
@@ -79,7 +80,7 @@ class ReinforcementLearningSystem:
 
         data = pd.DataFrame({"Steps": progress})
         data["Episodes"] = [i for i in range(self.episodes)]
-        file = open("./data/data.pickle", "wb")
-        pickle.dump(data, file)
+        timestamp = datetime.now().strftime("%m_%d_%H:%M:%S")
+        data.to_pickle(f"data/data_{timestamp}")
         data.plot.scatter(x="Episodes", y="Steps")
         plt.show()
