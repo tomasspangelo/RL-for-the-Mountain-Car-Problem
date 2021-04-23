@@ -35,15 +35,18 @@ class SimWorld:
 
         finished = self.is_finished(position, velocity)
         # Remove all but line 43(last reward define) to get back to normal rewards
+        '''
         dif = 0.5 * (velocity ** 2 - self.velocity ** 2) + 9.81 * (
                     math.cos(3 * (position + math.pi / 2)) - math.cos(3 * (self.position + math.pi / 2)))
         if dif > 0:
             reward = 1 if self.is_finished(position, velocity) else 0
         else:
             reward = 1 if self.is_finished(position, velocity) else -1
-
+        '''
+        reward = 0 if finished else -1
         self.velocity = velocity
         self.position = position
+
 
         return position, velocity, reward, finished
 
