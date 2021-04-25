@@ -7,17 +7,19 @@ import pandas as pd
 import pickle
 
 from datetime import datetime
+
+
 class ReinforcementLearningSystem:
     """
     Class for the reinforcement learning system.
     """
 
     def __init__(self, actor, tc, gamma, episodes):
-        timestamp = datetime.now().strftime("%d_%H:%M:%S")
+        timestamp = datetime.now().strftime("%d_%H")
         self.actor = actor
         self.tc = tc
         self.max_actions = 1000
-        self.gamma = gamma                      # discount factor
+        self.gamma = gamma  # discount factor
         self.episodes = episodes
         self.filename = timestamp
 
@@ -48,7 +50,7 @@ class ReinforcementLearningSystem:
 
             # FOR EACH STEP IN EPISODE
             while num_actions < self.max_actions and not finished:
-                if episode == self.episodes-1:
+                if episode == self.episodes - 1:
                     env.render()
                     time.sleep(0)
 
@@ -61,14 +63,13 @@ class ReinforcementLearningSystem:
 
                 # UPDATE Q
                 next_q = self.actor.get_q(next_state_vector, next_action)
-                target = reward + self.gamma*next_q
+                target = reward + self.gamma * next_q
                 self.actor.update_policy(state_vector, action, target)
 
                 # READY FOR NEXT STEP: S = S', A = A'
                 state_vector = next_state_vector
                 action = next_action
                 num_actions += 1
-
 
                 if finished:
                     print("MADE IT!")
@@ -77,7 +78,7 @@ class ReinforcementLearningSystem:
 
             progress.append(num_actions)
             if (episode + 1) % save_interval == 0:
-                self.actor.save_policy(episode+1, self.filename)
+                self.actor.save_policy(episode + 1, self.filename)
 
             self.actor.update_epsilon()
 
@@ -89,3 +90,28 @@ class ReinforcementLearningSystem:
         pickle.dump(data, file)
         data.plot.scatter(x="Episodes", y="Steps")
         plt.show()
+
+    def test_actor(self):
+        self.actor.epsilon = 0
+        x = np.random.uniform(-0.6, -0.4, 1)[0]
+        velocity = 0
+        env = SimWorld(x, velocity)
+
+        state_vector = self.tc.get_encoding(x, velocity)
+        action = self.actor.get_action(state_vector)
+
+        finished = False
+        num_actions = 1
+
+        while num_actions < self.max_actions and not finished:
+            env.render()
+            time.sleep(0)
+
+            x, velocity, reward, finished = env.perform_action(action)
+
+            next_state_vector = self.tc.get_encoding(x, velocity)
+            next_action = self.actor.get_action(next_state_vector)
+
+            state_vector = next_state_vector
+            action = next_action
+            num_actions += 1
