@@ -5,8 +5,10 @@ from coarse import TileCoding
 from rls import ReinforcementLearningSystem
 from actor import Actor
 import json
+import sys
 
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
@@ -49,6 +51,10 @@ def init_tc(tc_config):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        test()
+        return
+
     config = ConfigParser()
 
     config.read("./config.ini")
@@ -62,6 +68,28 @@ def main():
 
     save_interval = int(config.get("rls", "save_interval"))
     learner.learn(save_interval)
+
+
+def test():
+    config = ConfigParser()
+
+    config.read("./config.ini")
+
+    tc = init_tc(config['tile_coding'])
+
+    input_shape = tc.partitions ** 2 * tc.num_tilings + 1
+    actor = init_actor(config['actor'], input_shape)
+
+    path_list = [f.path for f in os.scandir("./actor") if f.is_dir()]
+    if len(path_list) != 1:
+        raise ValueError("There are no or more than one actor in the ./actor directory.")
+    path = path_list[-1]
+    model = tf.keras.models.load_model(path, compile=True)
+
+    actor.policy = model
+
+    learner = init_rls(actor, tc, config["rls"])
+    learner.test_actor()
 
 
 if __name__ == "__main__":
