@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import tensorflow as tf
+import pickle
 
 from coarse import TileCoding
 from rls import ReinforcementLearningSystem
@@ -26,7 +27,8 @@ def init_actor(actor_config, input_shape, gamma):
 
     keras_model.compile(optimizer=optimizer,
                         loss=tf.keras.losses.MeanSquaredError())
-    actor = Actor(keras_model, epsilon, epsilon_decay_factor, decay_factor, gamma)
+    actor = Actor(keras_model, epsilon,
+                  epsilon_decay_factor, decay_factor, gamma)
 
     return actor
 
@@ -48,6 +50,9 @@ def init_tc(tc_config):
     offset_percent = float(tc_config["offset_percent"])
     tc = TileCoding(num_tilings, partitions, x_range,
                     y_range, extra_lengths, offset_percent)
+    file = open("./actor/tc.pickle", "wb")
+    pickle.dump(tc, file)
+
     return tc
 
 
@@ -76,15 +81,17 @@ def test():
     config = ConfigParser()
 
     config.read("./config.ini")
-
-    tc = init_tc(config['tile_coding'])
+    file = open("./actor/tc.pickle", "rb")
+    tc = pickle.load(file)
 
     input_shape = tc.partitions ** 2 * tc.num_tilings + 1
-    actor = init_actor(config['actor'], input_shape)
+    gamma = float(config.get("rls", "gamma"))
+    actor = init_actor(config['actor'], input_shape, gamma)
 
     path_list = [f.path for f in os.scandir("./actor") if f.is_dir()]
     if len(path_list) != 1:
-        raise ValueError("There are no or more than one actor in the ./actor directory.")
+        raise ValueError(
+            "There are no or more than one actor in the ./actor directory.")
     path = path_list[-1]
     model = tf.keras.models.load_model(path, compile=True)
 

@@ -22,6 +22,7 @@ class ReinforcementLearningSystem:
         self.gamma = gamma  # discount factor
         self.episodes = episodes
         self.filename = timestamp
+        self.n = 3
 
     def learn(self, save_interval):
         """
@@ -47,7 +48,6 @@ class ReinforcementLearningSystem:
 
             num_actions = 1
             finished = False
-
             # FOR EACH STEP IN EPISODE
             while num_actions < self.max_actions and not finished:
                 if episode == self.episodes - 1:
@@ -56,20 +56,20 @@ class ReinforcementLearningSystem:
 
                 # TAKE ACTION A OBSERVE R, S'
                 x, velocity, reward, finished = env.perform_action(action)
+                if num_actions % self.n != 0:
+                    # CHOOSE ACTION A' FROM S' USING Q
+                    next_state_vector = self.tc.get_encoding(x, velocity)
+                    next_action = self.actor.get_action(next_state_vector)
+                    # UPDATE Q
+                    next_q = self.actor.get_q(next_state_vector, next_action)
+                    target = reward + self.gamma * next_q
+                    td_error = target - self.actor.get_q(state_vector, action)
+                    self.actor.update_policy(
+                        state_vector, action, target, td_error)
 
-                # CHOOSE ACTION A' FROM S' USING Q
-                next_state_vector = self.tc.get_encoding(x, velocity)
-                next_action = self.actor.get_action(next_state_vector)
-
-                # UPDATE Q
-                next_q = self.actor.get_q(next_state_vector, next_action)
-                target = reward + self.gamma * next_q
-                td_error = target - self.actor.get_q(state_vector, action)
-                self.actor.update_policy(state_vector, action, target, td_error)
-
-                # READY FOR NEXT STEP: S = S', A = A'
-                state_vector = next_state_vector
-                action = next_action
+                    # READY FOR NEXT STEP: S = S', A = A'
+                    state_vector = next_state_vector
+                    action = next_action
                 num_actions += 1
 
                 if finished:
@@ -93,7 +93,8 @@ class ReinforcementLearningSystem:
         plt.show()
 
     def test_actor(self):
-        self.actor.epsilon = 0
+        self.actor.epsilon = 0.1
+        n = 3
         x = np.random.uniform(-0.6, -0.4, 1)[0]
         velocity = 0
         env = SimWorld(x, velocity)
@@ -103,16 +104,15 @@ class ReinforcementLearningSystem:
 
         finished = False
         num_actions = 1
-
         while num_actions < self.max_actions and not finished:
             env.render()
             time.sleep(0)
 
             x, velocity, reward, finished = env.perform_action(action)
-
             next_state_vector = self.tc.get_encoding(x, velocity)
             next_action = self.actor.get_action(next_state_vector)
 
             state_vector = next_state_vector
-            action = next_action
+            if n % 3 != 0:
+                action = next_action
             num_actions += 1
