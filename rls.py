@@ -47,7 +47,7 @@ class ReinforcementLearningSystem:
 
             num_actions = 1
             finished = False
-
+            rbuf = []
             # FOR EACH STEP IN EPISODE
             while num_actions < self.max_actions and not finished:
                 if episode == self.episodes - 1:
@@ -62,10 +62,10 @@ class ReinforcementLearningSystem:
                 next_action = self.actor.get_action(next_state_vector)
 
                 # UPDATE Q
+
                 next_q = self.actor.get_q(next_state_vector, next_action)
                 target = reward + self.gamma * next_q
-                self.actor.update_policy(state_vector, action, target)
-
+                rbuf.append((state_vector, action, target))
                 # READY FOR NEXT STEP: S = S', A = A'
                 state_vector = next_state_vector
                 action = next_action
@@ -75,6 +75,8 @@ class ReinforcementLearningSystem:
                     print("MADE IT!")
                 elif num_actions >= self.max_actions:
                     print("Timeout :(")
+            for sample in rbuf:
+                self.actor.update_policy(sample[0], sample[1], sample[2])
 
             progress.append(num_actions)
             if (episode + 1) % save_interval == 0:
