@@ -51,7 +51,7 @@ class ReinforcementLearningSystem:
             finished = False
             # FOR EACH STEP IN EPISODE
             while num_actions < self.max_actions and not finished:
-                if episode == self.episodes - 1:
+                if (episode + 1) % save_interval == 0:
                     env.render()
                     time.sleep(0)
 
