@@ -1,17 +1,23 @@
 import random
 import tensorflow as tf
 import numpy as np
+from splitgd import SplitGD
 
 
-class Actor:
+class Actor(SplitGD):
     """
     Class for an actor.
     """
 
-    def __init__(self, keras_model, epsilon, epsilon_decay):
+    def __init__(self, keras_model, epsilon, epsilon_decay, decay_factor, gamma):
+        super().__init__(keras_model)
         self.policy = keras_model
         self.epsilon = epsilon
         self.epsilon_decay = epsilon_decay
+        self.eligibilities = []
+        self.td_error = 0
+        self.decay_factor = decay_factor
+        self.discount_factor = gamma
 
     def get_q(self, tiled_state, action):
         sa = np.concatenate((tiled_state, [action]), axis=None)
@@ -30,14 +36,15 @@ class Actor:
                 best_action = a
         return best_action
 
-    def update_policy(self, tiled_state, action, target):
+    def update_policy(self, tiled_state, action, target, td_error):
+        self.td_error = td_error
         sa = np.concatenate((tiled_state, [action]), axis=None)
         sa = sa.reshape((1,) + sa.shape)
         target = np.array([target])
         target = target.reshape((1,) + target.shape)
         # print("Feature:",sa)
         # print("Target:",target)
-        self.policy.fit(sa, target, epochs=3, verbose=1)
+        self.fit(sa, target, epochs=3, verbosity=0)
         #print("Output", self.policy(sa).numpy())
 
     def update_epsilon(self):
@@ -45,6 +52,23 @@ class Actor:
 
     def save_policy(self, episode, filename):
         self.policy.save("./anets/{filename}/{episode}".format(episode=episode, filename=filename))
+
+    def modify_gradients(self, gradients):
+        """
+        Modifies the gradient according to the eligibilities to fit the RL actor-critic algorithm.
+        :param gradients: The gradients given by the keras model
+        :return: Array of updated gradients
+        """
+        if not self.eligibilities:
+            for gradient_layer in gradients:
+                self.eligibilities.append(np.zeros(gradient_layer.shape))
+
+        for i in range(len(gradients)):
+            gradient_layer = gradients[i]
+            v_grad = 0 * gradient_layer if self.td_error == 0 else 1 / self.td_error * gradient_layer
+            self.eligibilities[i] = self.discount_factor * self.decay_factor * self.eligibilities[i] + v_grad
+
+        return [self.td_error * eligibility for eligibility in self.eligibilities]
 
 
 if __name__ == "__main__":

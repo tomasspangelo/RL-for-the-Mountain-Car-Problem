@@ -64,7 +64,8 @@ class ReinforcementLearningSystem:
                 # UPDATE Q
                 next_q = self.actor.get_q(next_state_vector, next_action)
                 target = reward + self.gamma * next_q
-                self.actor.update_policy(state_vector, action, target)
+                td_error = target - self.actor.get_q(state_vector, action)
+                self.actor.update_policy(state_vector, action, target, td_error)
 
                 # READY FOR NEXT STEP: S = S', A = A'
                 state_vector = next_state_vector

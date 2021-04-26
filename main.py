@@ -12,10 +12,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-def init_actor(actor_config, input_shape):
+def init_actor(actor_config, input_shape, gamma):
     epsilon = float(actor_config['epsilon'])
     epsilon_decay_factor = float(actor_config['epsilon_decay_factor'])
     learning_rate = float(actor_config['learning_rate'])
+    decay_factor = float(actor_config['decay_factor'])
 
     keras_model = tf.keras.models.Sequential()
     keras_model.add(tf.keras.Input(shape=input_shape))
@@ -25,7 +26,7 @@ def init_actor(actor_config, input_shape):
 
     keras_model.compile(optimizer=optimizer,
                         loss=tf.keras.losses.MeanSquaredError())
-    actor = Actor(keras_model, epsilon, epsilon_decay_factor)
+    actor = Actor(keras_model, epsilon, epsilon_decay_factor, decay_factor, gamma)
 
     return actor
 
@@ -62,7 +63,8 @@ def main():
     tc = init_tc(config['tile_coding'])
 
     input_shape = tc.partitions ** 2 * tc.num_tilings + 1
-    actor = init_actor(config['actor'], input_shape)
+    gamma = float(config.get("rls", "gamma"))
+    actor = init_actor(config['actor'], input_shape, gamma)
 
     learner = init_rls(actor, tc, config["rls"])
 
