@@ -44,7 +44,7 @@ class Actor(SplitGD):
         target = target.reshape((1,) + target.shape)
         # print("Feature:",sa)
         # print("Target:",target)
-        self.fit(sa, target, epochs=3, verbosity=0)
+        self.fit(sa, target, epochs=1, verbosity=0)
         #print("Output", self.policy(sa).numpy())
 
     def update_epsilon(self):
