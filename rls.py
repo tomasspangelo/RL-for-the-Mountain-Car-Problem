@@ -36,6 +36,7 @@ class ReinforcementLearningSystem:
         self.actor.save_policy(0, self.filename)
         # FOR EACH EPISODE
         for episode in tqdm(range(self.episodes)):
+            self.actor.reset_eligibilities()
             # INITIALIZE STATE S: x is randomly chosen in range [-0.6, -0.4] and velocity set to zero.
             x = np.random.uniform(-0.6, -0.4, 1)[0]
             velocity = 0

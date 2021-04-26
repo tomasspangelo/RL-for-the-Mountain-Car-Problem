@@ -70,6 +70,13 @@ class Actor(SplitGD):
 
         return [self.td_error * eligibility for eligibility in self.eligibilities]
 
+    def reset_eligibilities(self):
+        """
+        Resets state eligibilities to 0
+        :return: None
+        """
+        self.eligibilities = []
+
 
 if __name__ == "__main__":
     keras_model = tf.keras.models.Sequential()
